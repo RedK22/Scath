@@ -36,3 +36,23 @@ module.exports.registerUser = async function (req, res) {
     res.send(error.message);
   }
 };
+
+module.exports.loginUser = async function (req, res) {
+  let {email, password} = req.body;
+
+  let user = await userModel.findOne({email: email});
+
+  if (!user) return res.status(404).send("Email or Password incorrect.");
+
+  // If User exists
+
+  bcrypt.compare(password, user.password, function (err, result) {
+    if (result) {
+      let token = generateToken(user);
+      res.cookie("token", token);
+      res.send("You can login!");
+    } else {
+      res.status(404).send("Wrong Email/Password");
+    }
+  });
+};
